@@ -4,7 +4,7 @@ const PROFILES: Record<Exclude<SourceName, "custom">, SourceProfile> = {
   pj: {
     name: "pj",
     label: "Jurisprudencia Nacional Sistematizada (Poder Judicial del Perú)",
-    url: "https://jurisprudencia.pj.gob.pe/jurisprudenciaweb/faces/page/resultado.xhtml",
+    url: "https://jurisprudencia.pj.gob.pe/jurisprudenciaweb/faces/page/inicio.xhtml",
     requiresPeruVpn: true,
   },
   oefa: {

@@ -1,6 +1,6 @@
 # Scraper de Jurisprudencia del Poder Judicial del Perú
 
-Scraper HTTP escrito en TypeScript para extraer los documentos de la [Jurisprudencia Nacional Sistematizada del Poder Judicial del Perú](https://jurisprudencia.pj.gob.pe/jurisprudenciaweb/faces/page/resultado.xhtml), recorrer todas sus páginas y descargar los PDFs asociados.
+Scraper HTTP escrito en TypeScript para extraer los documentos de la [Jurisprudencia Nacional Sistematizada del Poder Judicial del Perú](https://jurisprudencia.pj.gob.pe/jurisprudenciaweb/faces/page/inicio.xhtml), recorrer todas sus páginas y descargar los PDFs asociados. La navegación comienza en `inicio.xhtml`, envía el formulario JSF real y sigue su redirección a `resultado.xhtml`.
 
 El proyecto no usa Puppeteer, Playwright, Selenium, WebDriver ni ninguna otra automatización de navegador. La comunicación se realiza con Axios; Cheerio analiza HTML/XML y un cliente JSF conserva cookies, `javax.faces.ViewState` y el estado de PrimeFaces entre solicitudes.
 
@@ -14,6 +14,8 @@ El proyecto no usa Puppeteer, Playwright, Selenium, WebDriver ni ninguna otra au
 - Nombres de archivo descriptivos y seguros para Windows, macOS y Linux.
 - Validación del contenido mediante la firma `%PDF-`; una página HTML no se guarda como PDF.
 - Cookies de sesión persistentes y seguimiento de redirecciones.
+- Proxy HTTP(S) explícito con afinidad de sesión, autenticación opcional y túneles persistentes.
+- Descubrimiento experimental de proxies públicos peruanos desde Litport, Databay, ProxyScrape y GeoNode, con rotación automática y timeout estricto por candidato.
 - Pausa configurable entre todas las solicitudes.
 - Reintentos de HTTP 429 y 5xx con backoff exponencial, jitter y soporte de `Retry-After`.
 - Cola persistente de descargas fallidas para reintentarlas en una ejecución posterior con una sesión JSF nueva.
@@ -24,7 +26,7 @@ El proyecto no usa Puppeteer, Playwright, Selenium, WebDriver ni ninguna otra au
 
 - Node.js 20 o superior.
 - npm.
-- Para la fuente principal, una VPN o conexión con salida en Perú. Fuera de esa región el servidor puede responder `403 Forbidden`.
+- Para la fuente principal, una VPN o conexión con salida en Perú. Fuera de esa región el servidor responde `403 Forbidden`.
 
 El repositorio de OEFA está configurado como fuente alternativa pública para desarrollar y probar el flujo sin VPN:
 
@@ -45,6 +47,20 @@ Conviene comenzar con una ejecución pequeña:
 ```bash
 npm start -- --source pj --max-pages 1 --max-documents 5
 ```
+
+Con un proxy peruano estable:
+
+```bash
+npm start -- --source pj --proxy http://usuario:clave@host:puerto --max-pages 1 --max-documents 5
+```
+
+Como alternativa de prueba, el programa puede descubrir proxies públicos de Perú y rotarlos. Como esos servidores aparecen y desaparecen constantemente, puede ser necesario ejecutar el comando nuevamente:
+
+```bash
+npm start -- --source pj --free-proxy-peru --filter txtBusqueda=casacion --max-pages 1 --max-documents 5 --no-download --request-timeout-ms 8000
+```
+
+Una VPN o un proxy propio estable es la opción recomendada para recorrer páginas y descargar PDFs. Los proxies públicos son compartidos, pueden registrar los destinos solicitados y muchos aceptan una sola conexión antes de dejar de responder. El scraper mantiene la verificación TLS habilitada, pero no se deben enviar credenciales ni información privada mediante `--free-proxy-peru`.
 
 Procesar la fuente principal completa:
 
@@ -81,6 +97,8 @@ El reintento vuelve a recorrer la consulta para obtener una sesión, un `ViewSta
 | `--backoff-ms N` | Base del backoff exponencial | `2000` |
 | `--filter campo=valor` | Filtro JSF; se puede repetir | — |
 | `--table-selector CSS` | Fuerza la tabla si el autodiscovery no basta | — |
+| `--proxy URL` | Usa un proxy HTTP(S) estable; acepta autenticación en la URL | — |
+| `--free-proxy-peru` | Descubre y rota proxies públicos peruanos | desactivado |
 | `--no-download` | Extrae solo metadatos | desactivado |
 | `--retry-failed` | Descarga solo la cola de fallos | desactivado |
 | `--debug` | Muestra diagnóstico de la sesión JSF | desactivado |
@@ -142,16 +160,19 @@ La suite automatizada cubre:
 - respuestas parciales AJAX y actualización de `ViewState`;
 - reemplazo de filas y paginación PrimeFaces;
 - reintentos `429 → 429 → PDF` con backoff exponencial;
-- validación de argumentos de CLI.
+- validación de argumentos de CLI;
+- normalización de proxies, puertos predeterminados y ocultamiento de credenciales en logs;
+- detección del botón `input[type=image]` y de los parámetros escapados de Mojarra usados por el sitio principal.
 
-La integración se comprobó contra el sitio alternativo real recorriendo páginas consecutivas y descargando un PDF mediante una acción `mojarra.jsfcljs`. El sitio principal no puede probarse fuera de una conexión peruana; el programa convierte sus respuestas 401/403/451 en un mensaje específico que solicita activar la VPN.
+La integración se comprobó contra el sitio alternativo real recorriendo páginas consecutivas y descargando un PDF mediante una acción `mojarra.jsfcljs`. En el sitio principal se verificaron respuestas 200 desde IPs peruanas, la apertura de `inicio.xhtml`, la extracción del `ViewState` y el envío del POST JSF real. La disponibilidad de proxies públicos no es una garantía de funcionamiento continuo; una salida peruana estable es necesaria para una prueba integral reproducible.
 
 ## Estructura interna
 
 ```text
 src/
 ├── cli.ts           # argumentos y validación
-├── http-client.ts   # cookies, rate limit, retry y backoff
+├── http-client.ts   # cookies, proxy, rate limit, retry y backoff
+├── proxy.ts        # validación y descubrimiento de proxies peruanos
 ├── jsf-parser.ts    # descubrimiento y parsing HTML/XML
 ├── jsf-client.ts    # sesión, búsqueda, paginación y acciones JSF
 ├── downloader.ts    # validación y escritura segura de PDFs

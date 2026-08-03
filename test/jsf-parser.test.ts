@@ -35,6 +35,28 @@ test("descubre formulario, acción de búsqueda y filtros JSF dinámicos", async
   assert.equal(filtered.fields["consultaForm:expediente"], "00123-2024");
 });
 
+test("interpreta el botón image y los parámetros escapados de Mojarra", () => {
+  const html = String.raw`
+    <form id="formBuscador" action="/faces/page/inicio.xhtml" method="post">
+      <input type="hidden" name="javax.faces.ViewState" value="state-pj">
+      <input name="formBuscador:txtBusqueda" value="">
+      <input type="image" name="formBuscador:j_idt31" src="../images/btn-buscar.png"
+        onclick="mojarra.jsfcljs(document.getElementById(\'formBuscador\'),{\'formBuscador:j_idt31\':\'formBuscador:j_idt31\',\'forward\':\'buscar\',\'busqueda\':\'especializada\'},\'\');return false">
+      <input type="image" name="formBuscador:j_idt69" src="../images/btn-buscar.png"
+        onclick="mojarra.jsfcljs(document.getElementById(\'formBuscador\'),{\'formBuscador:j_idt69\':\'formBuscador:j_idt69\',\'forward\':\'buscar\',\'formBuscador:j_idt71\':\'21\'},\'\');return false">
+    </form>`;
+  const action = findSearchAction(html, baseUrl);
+  assert.ok(action);
+  assert.equal(action.reference.controlId, "formBuscador:j_idt31");
+  assert.equal(action.reference.params.forward, "buscar");
+  assert.equal(action.reference.params.busqueda, "especializada");
+
+  const advanced = findSearchAction(html, baseUrl, true);
+  assert.ok(advanced);
+  assert.equal(advanced.reference.controlId, "formBuscador:j_idt69");
+  assert.equal(advanced.reference.params["formBuscador:j_idt71"], "21");
+});
+
 test("extrae todas las columnas, PDFs y paginación PrimeFaces", async () => {
   const html = await readFile(fixturePath, "utf8");
   const page = parseResultPage(html, {

@@ -21,6 +21,9 @@ export interface ScraperConfig {
   backoffBaseMs: number;
   filters: Record<string, string>;
   tableSelector?: string;
+  proxyUrl?: string;
+  freePeruProxy: boolean;
+  proxyUrls?: string[];
 }
 
 export interface FormState {
@@ -116,4 +119,5 @@ export interface RequestRetryEvent {
   delayMs: number;
   status?: number;
   reason: string;
+  proxy?: string;
 }

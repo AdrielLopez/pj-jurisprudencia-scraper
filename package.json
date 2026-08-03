@@ -11,7 +11,7 @@
     "scrape:pj": "tsx src/index.ts --source pj",
     "scrape:oefa": "tsx src/index.ts --source oefa",
     "retry:failed": "tsx src/index.ts --source pj --retry-failed",
-    "test": "tsx --test test/cli.test.ts test/http-client.test.ts test/jsf-parser.test.ts",
+    "test": "tsx --test test/cli.test.ts test/http-client.test.ts test/jsf-parser.test.ts test/proxy.test.ts",
     "check": "npm run typecheck && npm test"
   },
   "keywords": [
@@ -24,9 +24,10 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^1.11.0",
-    "axios-cookiejar-support": "^6.0.4",
     "cheerio": "^1.1.2",
     "domhandler": "^5.0.3",
+    "http-cookie-agent": "^7.0.4",
+    "https-proxy-agent": "^5.0.1",
     "tough-cookie": "^6.0.0"
   },
   "devDependencies": {

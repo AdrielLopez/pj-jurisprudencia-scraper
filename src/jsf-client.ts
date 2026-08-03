@@ -36,7 +36,14 @@ export class JsfClient {
   }
 
   async search(filters: Record<string, string>): Promise<void> {
-    const discovered = findSearchAction(this.html, this.pageUrl);
+    const usesGeneralTextSearch = Object.keys(filters).some(
+      (name) => (name.split(":").pop() ?? name) === "txtBusqueda",
+    );
+    const discovered = findSearchAction(
+      this.html,
+      this.pageUrl,
+      this.source.name === "pj" && !usesGeneralTextSearch,
+    );
     if (!discovered) {
       if (Object.keys(filters).length > 0) {
         throw new SiteStructureError(

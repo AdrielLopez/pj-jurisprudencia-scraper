@@ -105,6 +105,7 @@ export function extractFormState(html: string, pageUrl: string): FormState {
 export function findSearchAction(
   html: string,
   pageUrl: string,
+  preferLastMatch = false,
 ): SearchAction | undefined {
   const $ = load(html);
   const form = extractFormState(html, pageUrl);
@@ -118,14 +119,19 @@ export function findSearchAction(
   for (const element of controls) {
     const control = $(element);
     const text = normalizeSpace(
-      `${control.text()} ${control.attr("value") ?? ""} ${control.attr("title") ?? ""} ${control.attr("aria-label") ?? ""}`,
+      `${control.text()} ${control.attr("value") ?? ""} ${control.attr("title") ?? ""} ${control.attr("aria-label") ?? ""} ${control.attr("alt") ?? ""} ${control.attr("src") ?? ""}`,
     );
     const onclick = control.attr("onclick") ?? "";
     const score =
       (SEARCH_PATTERN.test(text) ? 20 : 0) +
       (SEARCH_PATTERN.test(control.attr("id") ?? "") ? 8 : 0) +
+      (SEARCH_PATTERN.test(onclick) ? 12 : 0) +
+      (/btn[-_]?buscar/i.test(control.attr("src") ?? "") ? 12 : 0) +
       (/PrimeFaces\.ab/.test(onclick) ? 4 : 0);
-    if (score > bestScore) {
+    if (
+      score > bestScore ||
+      (preferLastMatch && score === bestScore && score > 0)
+    ) {
       selected = element;
       bestScore = score;
     }
@@ -692,7 +698,8 @@ function extractUrlFromJavascript(javascript: string): string | undefined {
 
 function parseSubmitParams(javascript: string): Record<string, string> {
   const result: Record<string, string> = {};
-  const container = javascript.match(
+  const normalizedJavascript = javascript.replace(/\\(["'])/g, "$1");
+  const container = normalizedJavascript.match(
     /(?:addSubmitParam\s*\([^,]+,|jsfcljs\s*\([^,]+,)\s*(\{[^}]*\})/i,
   )?.[1];
   if (!container) return result;
