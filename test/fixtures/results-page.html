@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+  <body>
+    <form id="consultaForm" name="consultaForm" method="post" action="/faces/page/resultado.xhtml;jsessionid=abc">
+      <input type="hidden" name="consultaForm" value="consultaForm" />
+      <input type="hidden" name="javax.faces.ViewState" value="state-1" />
+      <label for="consultaForm:expediente">Número de expediente</label>
+      <input id="consultaForm:expediente" name="consultaForm:expediente" type="text" />
+      <button
+        id="consultaForm:j_idt37"
+        name="consultaForm:j_idt37"
+        type="submit"
+        onclick="PrimeFaces.ab({s:'consultaForm:j_idt37',u:'consultaForm:panel'});return false;"
+      >Buscar</button>
+
+      <span id="consultaForm:panel">
+        <div id="consultaForm:tablaDinamica" class="ui-datatable ui-widget">
+          <table role="grid">
+            <thead>
+              <tr>
+                <th aria-label="Nro.">Nro.</th>
+                <th aria-label="Número de expediente">Número de expediente</th>
+                <th aria-label="Administrado">Administrado</th>
+                <th aria-label="Archivo">Archivo</th>
+              </tr>
+            </thead>
+            <tbody id="consultaForm:tablaDinamica_data" class="ui-datatable-data">
+              <tr>
+                <td>1</td>
+                <td>00123-2024</td>
+                <td>Empresa Uno S.A.</td>
+                <td><a title="Descargar PDF" href="/documentos/resolucion-123.pdf">PDF</a></td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>00456-2024</td>
+                <td>Empresa Dos S.A.</td>
+                <td>
+                  <a
+                    title="Descargar archivo"
+                    href="#"
+                    onclick="mojarra.jsfcljs(document.getElementById('consultaForm'),{'consultaForm:tablaDinamica:1:j_idt99':'consultaForm:tablaDinamica:1:j_idt99','param_uuid':'fixture-uuid'},'');return false;"
+                  >PDF</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="ui-paginator" role="navigation" aria-label="Pagination">
+            <span class="ui-paginator-current">Página 1 de 3 (6 registros)</span>
+            <a class="ui-paginator-next" href="#" aria-label="Next Page">Siguiente</a>
+          </div>
+        </div>
+      </span>
+    </form>
+    <script>
+      PrimeFaces.cw('DataTable','widget_tabla',{id:'consultaForm:tablaDinamica',paginator:{rows:2,rowCount:6},rows:2});
+    </script>
+  </body>
+</html>
