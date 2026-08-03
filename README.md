@@ -33,7 +33,7 @@ El repositorio de OEFA está configurado como fuente alternativa pública para d
 ## Instalación
 
 ```bash
-git clone <URL-DEL-REPOSITORIO>
+git clone https://github.com/AdrielLopez/pj-jurisprudencia-scraper.git
 cd pj-jurisprudencia-scraper
 npm install
 ```
