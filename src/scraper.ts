@@ -32,7 +32,6 @@ export class Scraper {
       minDelayMs: config.requestDelayMs,
       maxRetries: config.maxRetries,
       backoffBaseMs: config.backoffBaseMs,
-      ...(config.proxyUrls ? { proxyUrls: config.proxyUrls } : {}),
       onRetry: (event) =>
         this.logger.warn("Solicitud reintentable", {
           url: event.url,
@@ -40,7 +39,6 @@ export class Scraper {
           esperaMs: event.delayMs,
           ...(event.status ? { status: event.status } : {}),
           razon: event.reason,
-          ...(event.proxy ? { proxy: event.proxy } : {}),
         }),
     });
     this.jsf = new JsfClient(
@@ -69,7 +67,6 @@ export class Scraper {
       salida: this.config.outputDir,
       descargarPdfs: this.config.downloadPdfs,
       soloFallidos: this.config.retryFailedOnly,
-      proxies: this.config.proxyUrls?.length ?? 0,
     });
 
     try {

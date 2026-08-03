@@ -27,19 +27,11 @@ test("rechaza filtros sin campo", () => {
   assert.throws(() => parseCli(["--filter", "=valor"]), /campo=valor/);
 });
 
-test("configura proxy peruano gratuito y valida exclusión mutua", () => {
-  const free = parseCli(["--source", "pj", "--free-proxy-peru"]);
-  assert.equal(free.config.freePeruProxy, true);
-
-  const explicit = parseCli(["--proxy", "proxy.example:8080"]);
-  assert.equal(explicit.config.proxyUrl, "http://proxy.example:8080/");
-  assert.throws(
-    () =>
-      parseCli([
-        "--proxy",
-        "http://proxy.example:8080",
-        "--free-proxy-peru",
-      ]),
-    /no ambos/,
+test("usa OEFA como fuente predeterminada", () => {
+  const result = parseCli([]);
+  assert.equal(result.config.source.name, "oefa");
+  assert.equal(
+    result.config.source.url,
+    "https://publico.oefa.gob.pe/repdig/consulta/consultaTfa.xhtml",
   );
 });

@@ -1,7 +1,7 @@
 {
   "name": "pj-jurisprudencia-scraper",
   "version": "1.0.0",
-  "description": "Scraper HTTP en TypeScript para Jurisprudencia Nacional Sistematizada del Poder Judicial del Perú",
+  "description": "Scraper HTTP en TypeScript para el Repositorio Digital OEFA",
   "type": "module",
   "main": "dist/src/index.js",
   "scripts": {
@@ -10,8 +10,8 @@
     "start": "tsx src/index.ts",
     "scrape:pj": "tsx src/index.ts --source pj",
     "scrape:oefa": "tsx src/index.ts --source oefa",
-    "retry:failed": "tsx src/index.ts --source pj --retry-failed",
-    "test": "tsx --test test/cli.test.ts test/http-client.test.ts test/jsf-parser.test.ts test/proxy.test.ts",
+    "retry:failed": "tsx src/index.ts --source oefa --retry-failed",
+    "test": "tsx --test test/cli.test.ts test/http-client.test.ts test/jsf-parser.test.ts",
     "check": "npm run typecheck && npm test"
   },
   "keywords": [
@@ -27,7 +27,6 @@
     "cheerio": "^1.1.2",
     "domhandler": "^5.0.3",
     "http-cookie-agent": "^7.0.4",
-    "https-proxy-agent": "^5.0.1",
     "tough-cookie": "^6.0.0"
   },
   "devDependencies": {

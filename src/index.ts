@@ -2,7 +2,6 @@
 import { HELP, parseCli } from "./cli.js";
 import { HttpStatusError, VpnRequiredError } from "./errors.js";
 import { Logger } from "./logger.js";
-import { discoverFreePeruProxies } from "./proxy.js";
 import { Scraper } from "./scraper.js";
 import { errorMessage } from "./utils.js";
 
@@ -13,28 +12,7 @@ async function main(): Promise<void> {
     return;
   }
   const logger = new Logger(cli.debug);
-  let proxyUrls = cli.config.proxyUrl ? [cli.config.proxyUrl] : undefined;
-  if (cli.config.freePeruProxy) {
-    logger.info("Descubriendo proxies públicos de Perú");
-    proxyUrls = await discoverFreePeruProxies({
-      timeoutMs: Math.min(cli.config.requestTimeoutMs, 15_000),
-      onSourceError: (event) =>
-        logger.warn("No se pudo consultar una fuente de proxies", {
-          fuente: event.source,
-          razon: event.reason,
-        }),
-    });
-    if (proxyUrls.length === 0) {
-      throw new Error(
-        "No se encontraron proxies públicos de Perú. Prueba nuevamente o usa --proxy URL.",
-      );
-    }
-    logger.info("Pool de proxies preparado", { candidatos: proxyUrls.length });
-  }
-  const scraper = new Scraper(
-    { ...cli.config, ...(proxyUrls ? { proxyUrls } : {}) },
-    logger,
-  );
+  const scraper = new Scraper(cli.config, logger);
   const summary = await scraper.run();
   logger.info("Ejecución terminada", {
     paginas: summary.pagesVisited,

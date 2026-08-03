@@ -1,6 +1,5 @@
 import path from "node:path";
 import { customProfile, getProfile } from "./profiles.js";
-import { parseProxyEndpoint } from "./proxy.js";
 import type { ScraperConfig } from "./types.js";
 import { parsePositiveInteger } from "./utils.js";
 
@@ -26,7 +25,6 @@ export function parseCli(argv: string[], cwd = process.cwd()): CliResult {
     "backoff-ms",
     "filter",
     "table-selector",
-    "proxy",
   ]);
   const booleanOptions = new Set([
     "no-download",
@@ -34,7 +32,6 @@ export function parseCli(argv: string[], cwd = process.cwd()): CliResult {
     "debug",
     "help",
     "h",
-    "free-proxy-peru",
   ]);
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -72,7 +69,7 @@ export function parseCli(argv: string[], cwd = process.cwd()): CliResult {
     }
   }
 
-  const sourceName = values.get("source") ?? "pj";
+  const sourceName = values.get("source") ?? "oefa";
   if (sourceName !== "pj" && sourceName !== "oefa") {
     throw new Error('--source debe ser "pj" u "oefa"');
   }
@@ -112,12 +109,6 @@ export function parseCli(argv: string[], cwd = process.cwd()): CliResult {
     values.get("backoff-ms") ?? "2000",
   ) as number;
   const tableSelector = values.get("table-selector");
-  const proxy = values.get("proxy");
-  if (proxy && flags.has("free-proxy-peru")) {
-    throw new Error("Usa --proxy o --free-proxy-peru, no ambos");
-  }
-  const proxyUrl = proxy ? parseProxyEndpoint(proxy).url : undefined;
-
   return {
     config: {
       source: profile,
@@ -132,8 +123,6 @@ export function parseCli(argv: string[], cwd = process.cwd()): CliResult {
       backoffBaseMs,
       filters,
       ...(tableSelector ? { tableSelector } : {}),
-      ...(proxyUrl ? { proxyUrl } : {}),
-      freePeruProxy: flags.has("free-proxy-peru"),
     },
     debug: flags.has("debug"),
     help: flags.has("help"),
@@ -149,13 +138,13 @@ function parseNonNegativeInteger(name: string, raw: string): number {
 }
 
 export const HELP = `
-Scraper de Jurisprudencia del Poder Judicial del Perú
+Scraper de resoluciones del Repositorio Digital OEFA
 
 Uso:
   npm start -- [opciones]
 
 Opciones:
-  --source pj|oefa          Fuente preconfigurada (predeterminado: pj)
+  --source oefa|pj          Fuente preconfigurada (predeterminado: oefa)
   --url URL                 Endpoint JSF personalizado
   --output-dir RUTA         Directorio de salida (predeterminado: output)
   --max-pages N             Procesar como máximo N páginas
@@ -166,17 +155,15 @@ Opciones:
   --backoff-ms N            Base del backoff exponencial (predeterminado: 2000)
   --filter campo=valor      Aplicar filtro; puede repetirse
   --table-selector CSS      Forzar el selector CSS de la tabla de resultados
-  --proxy URL               Proxy HTTP(S) estable, por ejemplo http://host:puerto
-  --free-proxy-peru         Descubrir y rotar proxies públicos de Perú
   --no-download             Extraer metadatos sin descargar PDFs
   --retry-failed            Recorrer el sitio y descargar solo la cola de fallos
   --debug                    Mostrar diagnóstico adicional
   -h, --help                 Mostrar esta ayuda
 
 Ejemplos:
-  npm start -- --source pj --max-pages 2
-  npm start -- --source pj --free-proxy-peru --max-pages 1
-  npm start -- --source oefa --no-download --max-pages 1
-  npm start -- --source pj --retry-failed
-  npm start -- --source pj --filter txtBusqueda=casacion
+  npm start -- --max-pages 1 --max-documents 5
+  npm start -- --no-download --max-pages 1
+  npm start -- --retry-failed
+  npm start -- --filter txtNroexp=891-08-PRODUCE/DIGSECOVI-Dsvs
+  npm start -- --source pj --max-pages 1
 `;
